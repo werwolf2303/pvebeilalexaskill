@@ -5,3 +5,6 @@
 .solaredge_cookies.txt
 feedFromGridSample.json
 feedToGridSample.json
+node_modules/
+.idea/
+package-lock.json
