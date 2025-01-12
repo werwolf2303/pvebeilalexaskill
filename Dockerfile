@@ -1,6 +1,5 @@
 FROM node:18-alpine
-RUN apk add --no-cache python3 py3-pip
-RUN pip install requests
+RUN apk add --no-cache python3 py3-requests
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
