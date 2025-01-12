@@ -5,12 +5,12 @@ const http = require("node:http");
 const {get} = require("node:https");
 const app = express();
 const skillBuilder = Alexa.SkillBuilders.custom();
-const siteId = fs.readFileSync("../siteId", "utf-8");
 const axios = require("axios");
 const {PythonShell} = require("python-shell");
 const fs = require("node:fs");
-const AlexaClientID = fs.readFileSync("../AlexaClientId", "utf8");
-const AlexaClientSecret = fs.readFileSync("../AlexaClientSecret", "utf8");
+const siteId = fs.readFileSync("../.siteId", "utf-8");
+const AlexaClientID = fs.readFileSync("../.alexaClientId", "utf8");
+const AlexaClientSecret = fs.readFileSync("../.alexaClientSecret", "utf8");
 let targets = [];
 let tokenRequestDate;
 let apiToken;
@@ -28,7 +28,7 @@ async function fetchSolarEdgeData() {
         mode: 'text',
         pythonOptions: ['-u'],
         cwd: "../",
-        args: ['https://api.solaredge.com/solaredge-apigw/api/site/1402550/currentPowerFlow.json?getLoadType=true']
+        args: [`https://api.solaredge.com/solaredge-apigw/api/site/${siteId}/currentPowerFlow.json?getLoadType=true`]
     }, function (err, results) {
         if (err)
             throw err;
@@ -38,14 +38,17 @@ async function fetchSolarEdgeData() {
         mode: 'text',
         pythonOptions: ['-u'],
         cwd: "../",
-        args: ['https://api.solaredge.com/solaredge-apigw/api/field/1402550/fieldOverview']
+        args: [`https://api.solaredge.com/solaredge-apigw/api/field/${siteId}/fieldOverview`]
     }, function (err, results) {
         if (err)
             throw err;
     });
-    resultForFieldOverview = new jsdom.JSDOM(resultForFieldOverview);
+    resultForFieldOverview = new jsdom.JSDOM(resultForFieldOverview[0]);
     const powerFlowUnit = resultForPowerFlow["unit"];
     const energyToday = resultForFieldOverview.window.document.getElementsByTagName("FieldOverviewData")[0].getElementsByTagName("lastDayData")[0].getElementsByTagName("energy")[0].getAttribute("localized");
+    const lifeTimeData = resultForFieldOverview.window.document.getElementsByTagName("FieldOverviewData")[0].getElementsByTagName("lifeTimeData")[0];
+    const lifeTimeEnergy = lifeTimeData.getElementsByTagName("energy")[0].getAttribute("localized");
+    const lifeTimeRevenue = decodeURIComponent(escape(lifeTimeData.getElementsByTagName("revenue")[0].getAttribute("localized")));
     const currentPower = resultForPowerFlow["PV"]["currentPower"] + " " + powerFlowUnit;
     const currentUsage = resultForPowerFlow["LOAD"]["currentPower"] + " " + powerFlowUnit;
     let currentFeed = resultForPowerFlow["GRID"]["currentPower"] + " " + powerFlowUnit;
@@ -67,7 +70,9 @@ async function fetchSolarEdgeData() {
         "energyToday": energyToday,
         "energyUsage": currentUsage,
         "energyFeed": currentFeed,
-        "energyFeedColor": currentFeedColor
+        "energyFeedColor": currentFeedColor,
+        "lifeTimeEnergy": lifeTimeEnergy,
+        "lifeTimeRevenue": lifeTimeRevenue
     }
     await updateDatastore(apiToken, [
         {
@@ -127,30 +132,24 @@ const APLEventHandler = {
                 break;
             }
             case "clickedEnergyNow": {
-                await fetchSolarEdgeData();
                 return getCurrentlyProduced(handlerInput, false);
             }
             case "clickedGetTodayProduced": {
-                await fetchSolarEdgeData();
                 return getHowMuchProduced(handlerInput, false);
             }
             case "clickedCurrentUsage": {
-                await fetchSolarEdgeData();
                 return getHowMuchUsageRightNow(handlerInput, false)
             }
             case "clickedHowMuchFeed": {
-                await fetchSolarEdgeData();
                 try {
-                    const result = await requestPromise(`https://monitoringapi.solaredge.com/site/${siteId}/currentPowerFlow?api_key=${apiKey}&format=json`);
-                    const jsonData = JSON.parse(result);
-                    const power = jsonData["siteCurrentPowerFlow"]["GRID"]["currentPower"];
                     let speechText;
-                    if(power === 0 || power === 0.0) {
+                    let energyFeed = newestData.energyFeed.split(" ")[0];
+                    if(energyFeed === "0.0" || energyFeed === "0") {
                         speechText = `Wir erzeugen gerade genau so viel wie wir verbrauchen`;
-                    } else if(power > 0) {
-                        speechText = `Wir beziehen gerade ${power} kW`;
+                    } else if(energyFeed > 0) {
+                        speechText = `Wir beziehen gerade ${newestData.energyFeed}`;
                     }else {
-                        speechText = `Wir speisen gerade ${power} kW ein`;
+                        speechText = `Wir speisen gerade ${newestData.energyFeed} ein`;
                     }
                     return handlerInput.responseBuilder
                         .speak(speechText)
@@ -254,7 +253,7 @@ function getCurrentlyProduced(handlerInput, card) {
 
 function getHowMuchProduced(handlerInput, card) {
     try {
-        const speechText = `Heute wurden ${newestData.energyToday} Wattstunden produziert.`;
+        const speechText = `Heute wurden ${newestData.energyToday} produziert.`;
         if(card) {
             return handlerInput.responseBuilder
                 .speak(speechText)
@@ -275,11 +274,7 @@ function getHowMuchProduced(handlerInput, card) {
 
 async function getTotalProduced(handlerInput) {
     try {
-        const result = await requestPromise(`https://monitoringapi.solaredge.com/site/${siteId}/overview?api_key=${apiKey}&format=json`);
-        const jsonData = JSON.parse(result);
-        const energy = jsonData["overview"]["lifeTimeData"]["energy"];
-        const revenue = jsonData["overview"]["lifeTimeData"]["revenue"];
-        const speechText = `Insgesamt haben wir schon ${energy} Wattstunden produziert und haben dadurch ${revenue} Euro erwirtschaftet`;
+        const speechText = `Insgesamt haben wir schon ${newestData.lifeTimeEnergy} produziert und haben dadurch ${newestData.lifeTimeRevenue} erwirtschaftet`;
         return handlerInput.responseBuilder
             .speak(speechText)
             .withSimpleCard('SolarEdge Energie', speechText)
@@ -356,12 +351,12 @@ function getHowMuchUsageRightNow(handlerInput, card) {
     try {
         if(card) {
             return handlerInput.responseBuilder
-                .speak("Unser Enegievebrauch ist gerade " + newestData.energyUsage + " kW")
-                .withSimpleCard('SolarEdge Energie', "Unser Enegievebrauch ist gerade " + newestData.energyUsage + " kW")
+                .speak("Unser Energieverbrauch ist gerade " + newestData.energyUsage)
+                .withSimpleCard('SolarEdge Energie', "Unser Energieverbrauch ist gerade " + newestData.energyUsage)
                 .getResponse();
         } else {
             return handlerInput.responseBuilder
-                .speak("Unser Enegievebrauch ist gerade " + newestData.energyUsage + " kW")
+                .speak("Unser Energieverbrauch ist gerade " + newestData.energyUsage)
                 .getResponse();
         }
     } catch (error) {
@@ -576,4 +571,5 @@ loadTargets();
 
 fetchSolarEdgeData().then(() => {
     http.createServer(app).listen(8080);
+    console.log("Server is listening at port 8080");
 });
