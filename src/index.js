@@ -28,7 +28,6 @@ async function fetchSolarEdgeData() {
     let resultForPowerFlow = await PythonShell.run('request.py', {
         mode: 'text',
         pythonOptions: ['-u'],
-        cwd: "../",
         args: [`https://api.solaredge.com/solaredge-apigw/api/site/${siteId}/currentPowerFlow.json?getLoadType=true`]
     }, function (err, results) {
         if (err)
@@ -38,7 +37,6 @@ async function fetchSolarEdgeData() {
     let resultForFieldOverview = await PythonShell.run('request.py', {
         mode: 'text',
         pythonOptions: ['-u'],
-        cwd: "../",
         args: [`https://api.solaredge.com/solaredge-apigw/api/field/${siteId}/fieldOverview`]
     }, function (err, results) {
         if (err)
