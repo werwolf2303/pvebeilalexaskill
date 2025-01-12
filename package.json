@@ -1,0 +1,27 @@
+{
+  "name": "pvebeilalexaskill",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "ask-sdk": "^2.14.0",
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-express-adapter": "^2.14.0",
+    "axios": "^1.7.9",
+    "axios-cookiejar-support": "^5.0.5",
+    "express": "^4.21.2",
+    "jsdom": "^26.0.0",
+    "node-fetch": "^3.3.2",
+    "python-shell": "^5.0.0",
+    "request-promise": "^4.2.6",
+    "tough-cookie": "^5.1.0",
+    "xhr2": "^0.2.1"
+  }
+}

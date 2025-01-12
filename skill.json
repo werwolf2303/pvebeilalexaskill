@@ -1,0 +1,110 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "solar edge",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "getproduced",
+          "slots": [],
+          "samples": [
+            "heute wie viel produziert",
+            "wie viel heute produziert",
+            "heute produziert",
+            "wie viel produziert heute",
+            "produziert heute",
+            "produziert",
+            "wie viel produziert"
+          ]
+        },
+        {
+          "name": "totalproduced",
+          "slots": [],
+          "samples": [
+            "wie viel insgesamt produziert",
+            "was ingesamt produziert",
+            "was hat die pvanlage insgesamt schon produziert",
+            "was wurde lebenslang produziert",
+            "was wurde insgesamt produziert",
+            "wie viel energie haben wir schon insgesamt produzuiert",
+            "wie viel haben wir set dem wir die solaranlage haben produziert"
+          ]
+        },
+        {
+          "name": "currentlyproduced",
+          "slots": [],
+          "samples": [
+            "Wie viel Leistung wird gerade erzeugt",
+            "Wie hoch ist die momentane Energieerzeugung",
+            "Was ist die aktuelle Stromproduktion",
+            "Wie viel Energie erzeugen wir aktuell",
+            "Wie viel Strom produzieren wir gerade",
+            "wie viel produzieren wir gerade"
+          ]
+        },
+        {
+          "name": "dowefeed",
+          "slots": [],
+          "samples": [
+            "speisen wir ins netz ein",
+            "speisen wir gerade ein",
+            "Speisen wir gerade ins Netz ein"
+          ]
+        },
+        {
+          "name": "howmuchfeed",
+          "slots": [],
+          "samples": [
+            "Wie viel wird gerade eingespeist",
+            "Wie viel speisen wir gerade ein",
+            "Wie viel Strom verkaufen wir gerade",
+            "Wie viel wird gerade ins Netz eingespeist",
+            "Wie viel speisen wir gerade ins netz ein"
+          ]
+        },
+        {
+          "name": "howmuchbuy",
+          "slots": [],
+          "samples": [
+            "Wie viel Strom kaufen wir",
+            "Wie viel Strom wird gerade eingekauft",
+            "Wie viel Strom beziehen wir gerade",
+            "Wie viel Strom kaufen wir gerade ein"
+          ]
+        },
+        {
+          "name": "howmuchusage",
+          "slots": [],
+          "samples": [
+            "Was ist unser Energieverbrauch",
+            "Was ist gerade unser Energieverbrauch",
+            "Wie viel Energie verwenden wir gerade",
+            "Wie viel Energie brauchen wir gerade",
+            "Wie viel Energie benutzen wir gerade",
+            "Wie viel Energie nutzen wir gerade"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
