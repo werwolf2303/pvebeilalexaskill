@@ -59,7 +59,7 @@ async function fetchSolarEdgeData() {
             if(connection["from"] === "GRID") {
                 currentFeedColor = "red";
             } else {
-                currentFeedColor = "#011f09";
+                currentFeedColor = "white";
             }
             break;
         }
